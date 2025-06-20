@@ -8,14 +8,19 @@ using Telegram.Bot.Types;
 namespace TeleBotFramework;
 public static class ModuleExtensions
 {
-    public static void AutoRegisterCommands(this IServiceCollection services)
+    public static void AddTelegramFramework(this IServiceCollection services, Assembly[] assembliesToRegisterCommandFrom)
     {
         services.AddScoped<ICommandFactory, CommandFactory>();
         services.AddScoped<ITelegramUpdateHandler, TelegramUpdateHandler>();
         services.AddSingleton<IUserSessionManager, UserSessionManager>();
+        if(assembliesToRegisterCommandFrom is not null && assembliesToRegisterCommandFrom.Length > 0)
+            services.AutoRegisterCommands(assembliesToRegisterCommandFrom);
+    }
 
+    private static void AutoRegisterCommands(this IServiceCollection services, Assembly[] assemblies)
+    {
         var type = typeof(ITelegramCommand);
-        var commandTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(s => s.GetTypes()).Where((p) => type.IsAssignableFrom(p) && p != type).ToList();
+        var commandTypes = assemblies.SelectMany(s => s.GetTypes()).Where((p) => type.IsAssignableFrom(p) && p != type).ToList();
         var commandList = new List<(string Name, string Description)>();
         foreach (var commandType in commandTypes)
         {
