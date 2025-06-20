@@ -11,6 +11,7 @@ public static class ModuleExtensions
     public static void AutoRegisterCommands(this IServiceCollection services)
     {
         services.AddScoped<ICommandFactory, CommandFactory>();
+        services.AddScoped<ITelegramUpdateHandler, TelegramUpdateHandler>();
         services.AddSingleton<IUserSessionManager, UserSessionManager>();
 
         var type = typeof(ITelegramCommand);
