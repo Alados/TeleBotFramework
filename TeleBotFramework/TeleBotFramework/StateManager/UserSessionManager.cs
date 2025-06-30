@@ -12,12 +12,13 @@ public class UserSessionManager : IUserSessionManager
         return _sessions.GetValueOrDefault(userId);
     }
 
-    public UserSession CreateOrUpdateSession(long userId, string command, int step)
+    public UserSession CreateOrUpdateSession(long userId, string command, int step, string[]? args = null)
     {
-        return _sessions.AddOrUpdate(userId, _ => new UserSession(userId, command, step), (key, oldValue) =>
+        return _sessions.AddOrUpdate(userId, _ => new UserSession(userId, command, step, args), (key, oldValue) =>
         {
             oldValue.Command = command;
             oldValue.Step = step;
+            oldValue.Arguments = args ?? oldValue.Arguments;
             return oldValue;
         });
     }

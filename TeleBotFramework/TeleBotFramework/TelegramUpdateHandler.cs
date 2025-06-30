@@ -22,14 +22,33 @@ public class TelegramUpdateHandler : ITelegramUpdateHandler
 
         if (update.Message != null)
         {
-            var userId = update.Message.From.Id;
+            var userId = update.Message.From!.Id;
             var userSession = _userSessionManager.GetSession(userId);
-            var commandName = userSession is null ? update.Message.Text : userSession.Command;
-            if (string.IsNullOrWhiteSpace(commandName))
+            string commandName;
+
+            // in case it's new command, clear prev session no metter what it was
+            if (update.Message.Text!.StartsWith("/"))
             {
-                await _bot.SendMessage(update.Message.Chat.Id, $"Enter command, please");
-                return;
+                _userSessionManager.ClearSession(userId);
+                userSession = null;
             }
+
+            if (userSession is null)
+            {
+                if (string.IsNullOrWhiteSpace(update.Message.Text))
+                {
+                    await _bot.SendMessage(update.Message.Chat.Id, $"Enter command, please");
+                    return;
+                }
+
+                var commandWithParams = update.Message.Text.Split(' ');
+                commandName = commandWithParams[0];
+            }
+            else
+            {
+                commandName = userSession.Command;
+            }
+
             var command = _commandFactory.CreateCommand(commandName);
             if (command is null)
             {
@@ -37,16 +56,18 @@ public class TelegramUpdateHandler : ITelegramUpdateHandler
                 return;
             }
 
-            await command.Execute(update, userSession);
+            await command.Execute(update);
         }
 
         if (update.CallbackQuery is { } cb)
         {
             var userId = update.CallbackQuery.From.Id;
+            var chatId = update.CallbackQuery.Message!.Chat.Id;
+            var userSession = _userSessionManager.GetSession(userId);
             var text = update.CallbackQuery.Data;
             if (string.IsNullOrWhiteSpace(text))
             {
-                await _bot.SendMessage(update.Message.Chat.Id, $"empty callback");
+                await _bot.SendMessage(chatId, $"empty callback");
                 return;
             }
 
@@ -54,11 +75,11 @@ public class TelegramUpdateHandler : ITelegramUpdateHandler
             var command = _commandFactory.CreateCommand(commandWithParams[0]);
             if (command is null)
             {
-                await _bot.SendMessage(update.Message.Chat.Id, $"Unknown command: {text}");
+                await _bot.SendMessage(chatId, $"Unknown command: {text}");
                 return;
             }
 
-            await command.Execute(update, null);
+            await command.Execute(update);
         }
     }
 }

@@ -5,5 +5,5 @@ public interface IUserSessionManager
 {
     void ClearSession(long userId);
     public UserSession? GetSession(long userId);
-    public UserSession CreateOrUpdateSession(long userId, string command, int step);
+    public UserSession CreateOrUpdateSession(long userId, string command, int step, string[]? args = null);
 }
