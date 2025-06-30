@@ -25,14 +25,6 @@ public class TelegramUpdateHandler : ITelegramUpdateHandler
             var userId = update.Message.From!.Id;
             var userSession = _userSessionManager.GetSession(userId);
             string commandName;
-
-            // in case it's new command, clear prev session no metter what it was
-            if (update.Message.Text!.StartsWith("/"))
-            {
-                _userSessionManager.ClearSession(userId);
-                userSession = null;
-            }
-
             if (userSession is null)
             {
                 if (string.IsNullOrWhiteSpace(update.Message.Text))
