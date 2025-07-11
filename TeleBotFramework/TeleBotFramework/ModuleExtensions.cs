@@ -28,13 +28,13 @@ public static class ModuleExtensions
                 continue;
 
             var nameProperty = commandType.GetProperty(nameof(ITelegramCommand.Name), BindingFlags.Public | BindingFlags.Static);
-            var name = (string)nameProperty.GetValue(null)!;
+            var name = (string)nameProperty!.GetValue(null)!;
 
             var descriptionProperty = commandType.GetProperty(nameof(ITelegramCommand.Description), BindingFlags.Public | BindingFlags.Static);
-            var description = (string)descriptionProperty.GetValue(null)!;
+            var description = (string)descriptionProperty!.GetValue(null)!;
 
             var isPublicProperty = commandType.GetProperty(nameof(ITelegramCommand.IsPublic), BindingFlags.Public | BindingFlags.Static);
-            var isPublic = (bool)isPublicProperty.GetValue(null)!;
+            var isPublic = (bool)isPublicProperty!.GetValue(null)!;
             if (isPublic)
                 commandList.Add((name, description));
 

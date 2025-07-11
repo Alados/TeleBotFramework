@@ -21,7 +21,7 @@ public class CommandFactory(IServiceProvider serviceProvider) : ICommandFactory
             {
                 var type = s.GetType();
                 var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Static);
-                var isPublic = (bool)properties.First(p => p.Name == nameof(ITelegramCommand.IsPublic)).GetValue(null);
+                var isPublic = (bool)properties.First(p => p.Name == nameof(ITelegramCommand.IsPublic)).GetValue(null)!;
                 if (!isPublic)
                     return null; // Skip non-public commands
 
@@ -30,8 +30,8 @@ public class CommandFactory(IServiceProvider serviceProvider) : ICommandFactory
 
                 return new CommandInfo
                 {
-                    Name = name,
-                    Description = description
+                    Name = name!,
+                    Description = description!
                 };
             })
             .Where(x => x is not null)

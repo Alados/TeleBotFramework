@@ -1,4 +1,5 @@
 ﻿using TeleBotFramework.Commands;
+using TeleBotFramework.Models;
 using TeleBotFramework.StateManager;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -22,8 +23,23 @@ public class TelegramUpdateHandler : ITelegramUpdateHandler
 
         if (update.Message != null)
         {
-            var userId = update.Message.From!.Id;
-            var userSession = _userSessionManager.GetSession(userId);
+            var updateInfo = new UpdateInfo
+            {
+                UserId = update.Message.From!.Id,
+                Username = update.Message.From.Username ?? string.Empty,
+                FirstName = update.Message.From.FirstName ?? string.Empty,
+                LastName = update.Message.From.LastName ?? string.Empty,
+                ChatId = update.Message.Chat.Id,
+                MessageId = update.Message.MessageId,
+                Text = update.Message.Text,
+            };
+            if (!string.IsNullOrEmpty(updateInfo.Text) && updateInfo.Text == CancelCommand.Name)
+            {
+                await _commandFactory.CreateCommand(CancelCommand.Name)!.Execute(updateInfo);
+                return;
+            }
+
+            var userSession = _userSessionManager.GetSession(updateInfo.UserId);
             string commandName;
             if (userSession is null)
             {
@@ -48,30 +64,37 @@ public class TelegramUpdateHandler : ITelegramUpdateHandler
                 return;
             }
 
-            await command.Execute(update);
+            await command.Execute(updateInfo);
         }
 
         if (update.CallbackQuery is { } cb)
         {
-            var userId = update.CallbackQuery.From.Id;
-            var chatId = update.CallbackQuery.Message!.Chat.Id;
-            var userSession = _userSessionManager.GetSession(userId);
-            var text = update.CallbackQuery.Data;
-            if (string.IsNullOrWhiteSpace(text))
+            var updateInfo = new UpdateInfo
             {
-                await _bot.SendMessage(chatId, $"empty callback");
+                UserId = update.CallbackQuery.From.Id,
+                Username = update.CallbackQuery.From.Username ?? string.Empty,
+                FirstName = update.CallbackQuery.From.FirstName ?? string.Empty,
+                LastName = update.CallbackQuery.From.LastName ?? string.Empty,
+                ChatId = update.CallbackQuery.Message!.Chat.Id,
+                MessageId = update.CallbackQuery.Message.Id,
+                Text = update.CallbackQuery.Data,
+                InlineKeyboardMarkup = update.CallbackQuery.Message.ReplyMarkup,
+            };
+            if (string.IsNullOrWhiteSpace(updateInfo.Text))
+            {
+                await _bot.SendMessage(updateInfo.ChatId, $"empty callback");
                 return;
             }
 
-            var commandWithParams = text.Split(' ');
+            var commandWithParams = updateInfo.Text.Split(' ');
             var command = _commandFactory.CreateCommand(commandWithParams[0]);
             if (command is null)
             {
-                await _bot.SendMessage(chatId, $"Unknown command: {text}");
+                await _bot.SendMessage(updateInfo.ChatId, $"Unknown command: {updateInfo.Text}");
                 return;
             }
 
-            await command.Execute(update);
+            await command.Execute(updateInfo);
         }
     }
 }

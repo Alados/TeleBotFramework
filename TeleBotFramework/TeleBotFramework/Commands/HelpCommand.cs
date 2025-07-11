@@ -12,13 +12,10 @@ internal class HelpCommand(ICommandFactory commandFactory, ITelegramBotClient bo
     public static string Description => "Shows command list";
     public static bool IsPublic => true;
 
-    public async Task Execute(Update update)
+    public async Task Execute(UpdateInfo update)
     {
-        var message = update.Message!;
-        var chatId = message.Chat.Id;
-
         var commands = _commandFactory.GetCommandList();
         var commandList = string.Join("\n", commands.Select(c => $"{c.Name} - {c.Description}"));
-        await _bot.SendMessage(chatId, commandList);
+        await _bot.SendMessage(update.ChatId, commandList);
     }
 }
