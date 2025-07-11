@@ -13,8 +13,7 @@ public static class ModuleExtensions
         services.AddScoped<ICommandFactory, CommandFactory>();
         services.AddScoped<ITelegramUpdateHandler, TelegramUpdateHandler>();
         services.AddSingleton<IUserSessionManager, UserSessionManager>();
-        if(assembliesToRegisterCommandFrom is not null && assembliesToRegisterCommandFrom.Length > 0)
-            services.AutoRegisterCommands(assembliesToRegisterCommandFrom);
+        services.AutoRegisterCommands([.. assembliesToRegisterCommandFrom, typeof(ModuleExtensions).Assembly]);
     }
 
     private static void AutoRegisterCommands(this IServiceCollection services, Assembly[] assemblies)
