@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using TeleBotFramework.Attributes;
 using TeleBotFramework.Models;
 
 namespace TeleBotFramework.Commands;
@@ -20,18 +21,14 @@ public class CommandFactory(IServiceProvider serviceProvider) : ICommandFactory
             .Select(s =>
             {
                 var type = s.GetType();
-                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Static);
-                var isPublic = (bool)properties.First(p => p.Name == nameof(ITelegramCommand.IsPublic)).GetValue(null)!;
-                if (!isPublic)
+                var command = type.GetCustomAttribute<CommandAttribute>() ?? throw new Exception("ITelegramCommand should have Command attribute");
+                if (!command.IsPublic)
                     return null; // Skip non-public commands
-
-                var name = properties.First(p => p.Name == nameof(ITelegramCommand.Name)).GetValue(null) as string;
-                var description = properties.First(p => p.Name == nameof(ITelegramCommand.Description)).GetValue(null) as string;
 
                 return new CommandInfo
                 {
-                    Name = name!,
-                    Description = description!
+                    Name = command.Name,
+                    Description = command.Description
                 };
             })
             .Where(x => x is not null)

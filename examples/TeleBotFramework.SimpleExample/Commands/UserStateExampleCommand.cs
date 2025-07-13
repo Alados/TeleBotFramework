@@ -1,18 +1,17 @@
-﻿using TeleBotFramework.Commands;
+﻿using TeleBotFramework.Attributes;
+using TeleBotFramework.Commands;
 using TeleBotFramework.Models;
 using TeleBotFramework.StateManager;
 using Telegram.Bot;
 
 namespace TeleBotFramework.SimpleExample.Commands;
 
+[Command(_commandName, "Resend message to chat", true)]
 internal class UserStateExampleCommand(ITelegramBotClient bot, IUserSessionManager userSessionManager) : ITelegramCommand
 {
     private readonly ITelegramBotClient _bot = bot;
     private readonly IUserSessionManager _userSessionManager = userSessionManager;
-
-    public static string Name => "/resend";
-    public static string Description => "Resend message to chat";
-    public static bool IsPublic => true;
+    private const string _commandName = "/resend";
 
     public async Task Execute(UpdateInfo update)
     {
@@ -22,7 +21,7 @@ internal class UserStateExampleCommand(ITelegramBotClient bot, IUserSessionManag
         {
             case 0:
                 await _bot.SendMessage(update.ChatId, "Hi, enter message and I'll resend it to you");
-                _userSessionManager.CreateOrUpdateSession(update.UserId, Name, 1, ["arg"]);
+                _userSessionManager.CreateOrUpdateSession(update.UserId, _commandName, 1, ["arg"]);
                 break;
             case 1:
                 if (string.IsNullOrWhiteSpace(update.Text))

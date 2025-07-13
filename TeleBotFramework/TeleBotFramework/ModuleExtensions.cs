@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using TeleBotFramework.Attributes;
 using TeleBotFramework.Commands;
 using TeleBotFramework.StateManager;
 using Telegram.Bot;
@@ -26,18 +27,11 @@ public static class ModuleExtensions
             if (!typeof(ITelegramCommand).IsAssignableFrom(commandType))
                 continue;
 
-            var nameProperty = commandType.GetProperty(nameof(ITelegramCommand.Name), BindingFlags.Public | BindingFlags.Static);
-            var name = (string)nameProperty!.GetValue(null)!;
+            var command = commandType.GetCustomAttribute<CommandAttribute>() ?? throw new Exception($"ITelegramCommand should have Command attribute");
+            if (command.IsPublic)
+                commandList.Add((command.Name, command.Description));
 
-            var descriptionProperty = commandType.GetProperty(nameof(ITelegramCommand.Description), BindingFlags.Public | BindingFlags.Static);
-            var description = (string)descriptionProperty!.GetValue(null)!;
-
-            var isPublicProperty = commandType.GetProperty(nameof(ITelegramCommand.IsPublic), BindingFlags.Public | BindingFlags.Static);
-            var isPublic = (bool)isPublicProperty!.GetValue(null)!;
-            if (isPublic)
-                commandList.Add((name, description));
-
-            services.AddKeyedScoped(typeof(ITelegramCommand), name, commandType);
+            services.AddKeyedScoped(typeof(ITelegramCommand), command.Name, commandType);
         }
 
         var sp = services.BuildServiceProvider();

@@ -33,9 +33,9 @@ public class TelegramUpdateHandler : ITelegramUpdateHandler
                 MessageId = update.Message.MessageId,
                 Text = update.Message.Text,
             };
-            if (!string.IsNullOrEmpty(updateInfo.Text) && updateInfo.Text == CancelCommand.Name)
+            if (!string.IsNullOrEmpty(updateInfo.Text) && updateInfo.Text == "/cancel")
             {
-                await _commandFactory.CreateCommand(CancelCommand.Name)!.Execute(updateInfo);
+                await _commandFactory.CreateCommand("/cancel")!.Execute(updateInfo);
                 return;
             }
 

@@ -1,16 +1,14 @@
-﻿using TeleBotFramework.Commands;
+﻿using TeleBotFramework.Attributes;
+using TeleBotFramework.Commands;
 using TeleBotFramework.Models;
 using Telegram.Bot;
 
 namespace TeleBotFramework.SimpleExample.Commands;
 
+[Command("/start", "Start operation", true)]
 internal class StartCommand(ITelegramBotClient bot) : ITelegramCommand
 {
     private readonly ITelegramBotClient _bot = bot;
-
-    public static string Name => "/start";
-    public static string Description => "Start operation";
-    public static bool IsPublic => true;
 
     public async Task Execute(UpdateInfo update)
     {
