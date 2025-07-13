@@ -1,6 +1,6 @@
 # TeleBotFramework
 
-Minimalistic, dependency-injection-first command framework for [Telegram.Bot](https://github.com/Alados/TeleBotFramework), designed to let you build modular, maintainable Telegram bots with almost zero boilerplate.
+Minimalistic, dependency-injection-first command framework for [Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot), designed to let you build modular, maintainable Telegram bots with almost zero boilerplate.
 
 ---
 
