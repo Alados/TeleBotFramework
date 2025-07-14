@@ -2,9 +2,8 @@
 using System.Reflection;
 using TeleBotFramework.Attributes;
 using TeleBotFramework.Commands;
+using TeleBotFramework.Infrastructure.HostedServices;
 using TeleBotFramework.StateManager;
-using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace TeleBotFramework;
 public static class ModuleExtensions
@@ -15,6 +14,7 @@ public static class ModuleExtensions
         services.AddScoped<ITelegramUpdateHandler, TelegramUpdateHandler>();
         services.AddSingleton<IUserSessionManager, UserSessionManager>();
         services.AutoRegisterCommands([.. assembliesToRegisterCommandFrom, typeof(ModuleExtensions).Assembly]);
+        services.AddHostedService<BotStartupHostedService>();
     }
 
     private static void AutoRegisterCommands(this IServiceCollection services, Assembly[] assemblies)
@@ -33,18 +33,5 @@ public static class ModuleExtensions
 
             services.AddKeyedScoped(typeof(ITelegramCommand), command.Name, commandType);
         }
-
-        var sp = services.BuildServiceProvider();
-        using var scope = sp.CreateScope();
-        var bot = scope.ServiceProvider.GetRequiredService<ITelegramBotClient>();
-        bot.SetMyCommands(
-            [.. commandList.Select(c =>
-                new BotCommand
-                {
-                    Command = c.Name.TrimStart('/'), // /start → start
-                    Description = c.Description
-                })
-            ]
-        );
     }
 }
