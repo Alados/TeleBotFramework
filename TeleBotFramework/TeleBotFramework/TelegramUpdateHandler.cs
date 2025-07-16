@@ -1,4 +1,5 @@
-﻿using TeleBotFramework.Commands;
+﻿using Microsoft.Extensions.Logging;
+using TeleBotFramework.Commands;
 using TeleBotFramework.Models;
 using TeleBotFramework.StateManager;
 using Telegram.Bot;
@@ -7,15 +8,15 @@ using Telegram.Bot.Types;
 namespace TeleBotFramework;
 public class TelegramUpdateHandler : ITelegramUpdateHandler
 {
-    private readonly ITelegramBotClient _bot;
     private readonly ICommandFactory _commandFactory;
     private readonly IUserSessionManager _userSessionManager;
+    private readonly ILogger<TelegramUpdateHandler> _logger;
 
-    public TelegramUpdateHandler(ICommandFactory commandFactory, ITelegramBotClient bot, IUserSessionManager userSessionManager)
+    public TelegramUpdateHandler(ICommandFactory commandFactory, IUserSessionManager userSessionManager, ILogger<TelegramUpdateHandler> logger)
     {
         _commandFactory = commandFactory;
-        _bot = bot;
         _userSessionManager = userSessionManager;
+        _logger = logger;
     }
 
     public async Task HandleUpdate(Update update)
@@ -45,7 +46,6 @@ public class TelegramUpdateHandler : ITelegramUpdateHandler
             {
                 if (string.IsNullOrWhiteSpace(update.Message.Text))
                 {
-                    await _bot.SendMessage(update.Message.Chat.Id, $"Enter command, please");
                     return;
                 }
 
@@ -60,7 +60,7 @@ public class TelegramUpdateHandler : ITelegramUpdateHandler
             var command = _commandFactory.CreateCommand(commandName);
             if (command is null)
             {
-                await _bot.SendMessage(update.Message.Chat.Id, $"Unknown command: {commandName}");
+                _logger.LogInformation("Unknown command {commandName}", commandName);
                 return;
             }
 
@@ -82,7 +82,7 @@ public class TelegramUpdateHandler : ITelegramUpdateHandler
             };
             if (string.IsNullOrWhiteSpace(updateInfo.Text))
             {
-                await _bot.SendMessage(updateInfo.ChatId, $"empty callback");
+                _logger.LogInformation("empty callback");
                 return;
             }
 
@@ -90,7 +90,8 @@ public class TelegramUpdateHandler : ITelegramUpdateHandler
             var command = _commandFactory.CreateCommand(commandWithParams[0]);
             if (command is null)
             {
-                await _bot.SendMessage(updateInfo.ChatId, $"Unknown command: {updateInfo.Text}");
+
+                _logger.LogInformation("Unknown command {commandName}", updateInfo.Text);
                 return;
             }
 

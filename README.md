@@ -10,7 +10,8 @@ Minimalistic, dependency-injection-first command framework for [Telegram.Bot](ht
 - **Auto-registration** of all commands found in your assemblies  
 - **IServiceCollection** extension: `AddTelegramFramework(...)`  
 - **ITelegramUpdateHandler** dispatches incoming updates to your commands
-- **IUserStateManager** for per-user state persistence across sessions  
+- **ITeleBotClient** override of default Telegram.Bot client to balance request count per second
+- **IUserStateManager** for per-user state persistence across sessions
 - **MarkdownHelper** utility to safely format Markdown messages  
 - Ready to use in **ASP.NET Core** (webhook) or **long-polling** console apps
 
@@ -71,13 +72,11 @@ using TeleBotFramework.Models;
 using Telegram.Bot;
 
 namespace TeleBotFramework.SimpleExample.Commands
-internal class StartCommand(ITelegramBotClient bot) : ITelegramCommand
-{
-    private readonly ITelegramBotClient _bot = bot;
 
-    public static string Name => "/start";
-    public static string Description => "Start operation";
-    public static bool IsPublic => true;
+[Command("/start", "Start operation", true)]
+internal class StartCommand(ITeleBotClient bot) : ITelegramCommand
+{
+    private readonly ITeleBotClient _bot = bot;
 
     public async Task Execute(UpdateInfo update)
     {
@@ -112,6 +111,7 @@ Link - https://www.nuget.org/packages/TeleBotFramework/
   /Handlers/                        # Update dispatching & routing
   /Models/                          # UpdateInfo, other DTOs
   /Extensions/                      # IServiceCollection extensions
+  /Client/                          # ITeleBotClient client
   /State/                           # IUserStateManager implementations
   /Utils/                           # MarkdownHelper and other helpers
 /examples/

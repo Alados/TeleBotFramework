@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using TeleBotFramework.Attributes;
+using TeleBotFramework.Client;
 using TeleBotFramework.Commands;
 using TeleBotFramework.StateManager;
 using Telegram.Bot;
@@ -14,6 +15,7 @@ public static class ModuleExtensions
         services.AddScoped<ICommandFactory, CommandFactory>();
         services.AddScoped<ITelegramUpdateHandler, TelegramUpdateHandler>();
         services.AddSingleton<IUserSessionManager, UserSessionManager>();
+        services.AddScoped<ITeleBotClient, TeleBotClient>();
         services.AutoRegisterCommands([.. assembliesToRegisterCommandFrom, typeof(ModuleExtensions).Assembly]);
     }
 
