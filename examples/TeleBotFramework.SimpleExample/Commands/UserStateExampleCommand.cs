@@ -1,15 +1,15 @@
 ﻿using TeleBotFramework.Attributes;
+using TeleBotFramework.Client;
 using TeleBotFramework.Commands;
 using TeleBotFramework.Models;
 using TeleBotFramework.StateManager;
-using Telegram.Bot;
 
 namespace TeleBotFramework.SimpleExample.Commands;
 
 [Command(_commandName, "Resend message to chat", true)]
-internal class UserStateExampleCommand(ITelegramBotClient bot, IUserSessionManager userSessionManager) : ITelegramCommand
+internal class UserStateExampleCommand(ITeleBotClient bot, IUserSessionManager userSessionManager) : ITelegramCommand
 {
-    private readonly ITelegramBotClient _bot = bot;
+    private readonly ITeleBotClient _bot = bot;
     private readonly IUserSessionManager _userSessionManager = userSessionManager;
     private const string _commandName = "/resend";
 
