@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Exceptions;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TeleBotFramework.Client;
@@ -9,9 +10,14 @@ public class TeleBotClient(ITelegramBotClient botClient) : ITeleBotClient
     private int _messagesSentThisSecond = 0;
     private DateTime _lastResetTime = DateTime.UtcNow;
 
-    public async Task SendMessage(long chatId, string message, InlineKeyboardMarkup? replyMarkup = null)
+    public async Task SendMessage(long chatId, string message, ParseMode parseMode = ParseMode.None, InlineKeyboardMarkup? replyMarkup = null)
     {
-        await SendMessageWithRateLimit(_botClient.SendMessage(chatId, message, replyMarkup: replyMarkup), 20);
+        await SendMessageWithRateLimit(_botClient.SendMessage(chatId, message, parseMode, replyMarkup: replyMarkup), 20);
+    }
+
+    public async Task EditMessageText(long chatId, int messageId, string newText, InlineKeyboardMarkup? replyMarkup = null)
+    {
+        await SendMessageWithRateLimit(_botClient.EditMessageText(chatId, messageId, newText, replyMarkup: replyMarkup), 20);
     }
 
     public async Task EditMessageReplyMarkup(long chatId, int messageId, InlineKeyboardMarkup? replyMarkup = null)
